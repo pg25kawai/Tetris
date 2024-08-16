@@ -24,20 +24,14 @@ public class GameManager : MonoBehaviour
         Debug.Log("");
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    private void NextRound()
+    public void NextRound()
     {
         // Get next block and clear block from next block area
         Block controlledBlock = _blocksQueue.Dequeue();
         _board.SetBlockOnTileMap(controlledBlock.GetCoordsAfterOffset(), toClear: true);
 
         // Spawn at top of board
-        controlledBlock.SetPivotToSpawnLocation();
+        controlledBlock.SetOffsetToSpawnLocation();
         _controller.ControlledBlock = controlledBlock;
         _board.SetBlockOnTileMap(controlledBlock.GetCoordsAfterOffset());
 
@@ -45,7 +39,7 @@ public class GameManager : MonoBehaviour
         SpawnBlock();
     }
 
-    public Block SpawnBlock()
+    private Block SpawnBlock()
     {
         // Instantiate the prefab and get the Block script
         GameObject blockGO = Instantiate(_blockPrefab);

@@ -44,3 +44,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f6895092f0733045b53cfe17dd567bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _nextBlockEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 11400000, guid: bae01fe7dc6ed184a9a0b6d6a5374187, type: 2}
+        m_TargetAssemblyTypeName: GameEvents.GameEventAsset`1[[System.Boolean, mscorlib
+        m_MethodName: Invoke
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2

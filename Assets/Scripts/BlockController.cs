@@ -22,8 +22,9 @@ public class BlockController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Time.time - _lastMoveTime >= _speedStep || 
-            Input.GetKeyDown(KeyCode.S))
+        //if (Time.time - _lastMoveTime >= _speedStep ||
+        //    Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S))
         {
             _controlledBlock.Translate(Vector2Int.down);
             _lastMoveTime = Time.time;
@@ -37,6 +38,11 @@ public class BlockController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.D))
         {
             _controlledBlock.Translate(Vector2Int.right);
+        }
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            _controlledBlock.Rotate(90);
         }
     }
 }
