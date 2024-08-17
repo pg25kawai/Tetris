@@ -1,8 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Tilemaps;
 
 public class Board : MonoBehaviour
@@ -11,13 +10,10 @@ public class Board : MonoBehaviour
     [SerializeField] private int _width;
     [SerializeField] private Tile _tileBlock;
     [SerializeField] private Tile _tileBackground;
+    [SerializeField] private UnityEvent _incrementScoreEvent;
 
     private Tilemap _tileMap;
     private int[,] _boardMatrix;
-
-    //public Tilemap TileMap => _tileMap;
-    //public int Height => _height;
-    //public int Width => _width;
 
     void Awake()
     {
@@ -28,6 +24,29 @@ public class Board : MonoBehaviour
     private void CreateBoard()
     {
         _boardMatrix = new int[_width, _height];
+    }
+
+    public void ResetBoard()
+    {
+        _tileMap.ClearAllTiles();
+
+        BoundsInt boardBound = new BoundsInt(
+            new Vector3Int(0, 0, 0), 
+            new Vector3Int(_width, _height, 0));
+
+        TileBase[] tileArray = new TileBase[
+            boardBound.size.x * 
+            boardBound.size.y * 
+            boardBound.size.z];
+
+        for (int index = 0; index < tileArray.Length; index++)
+        {
+            tileArray[index] = _tileBackground;
+        }
+
+        _tileMap.SetTilesBlock(boardBound, tileArray);
+
+        CreateBoard();
     }
 
     public bool IsCoordValid(Vector2Int coords)
@@ -65,14 +84,12 @@ public class Board : MonoBehaviour
         }
     }
 
-    public void SetBlockOnMatrix(Vector2Int[] coords, bool toClear = false)
+    public void SetBlockOnMatrix(Vector2Int[] coords)
     {
-        int value = toClear ? 0 : 1;
         foreach (Vector2Int cellCoord in coords)
         {
-            _boardMatrix[cellCoord.x, cellCoord.y] = value;
+            _boardMatrix[cellCoord.x, cellCoord.y] = 1;
         }
-        Debug.Log("");
     }
 
     public bool IsLineFilled(int yCoord)
@@ -93,6 +110,8 @@ public class Board : MonoBehaviour
             _tileMap.SetTile(new Vector3Int(x, yCoord), null);
             _boardMatrix[x, yCoord] = 0;
         }
+
+        _incrementScoreEvent.Invoke();
     }
 
     public void ShiftLinesDown(int yCoord)
@@ -103,9 +122,13 @@ public class Board : MonoBehaviour
             for (int x = 0; x < _width; x++)
             {
                 TileBase tile = _tileMap.GetTile(new Vector3Int(x, y + 1));
-                _tileMap.SetTile(new Vector3Int(x, y), tile);
                 if (!IsOutOfBoundY(y + 1))
+                {
+                    _tileMap.SetTile(new Vector3Int(x, y), tile);
                     _boardMatrix[x, y] = _boardMatrix[x, y + 1];
+                }
+                else
+                    _tileMap.SetTile(new Vector3Int(x, y), _tileBackground);
             }
             y++;
         }

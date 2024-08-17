@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -78,7 +76,7 @@ public class Block : MonoBehaviour
         }
     }
 
-    public void Rotate(float angle)
+    public void Rotate(float angle = 90)
     {
         Vector2Int[] newCoords = new Vector2Int[_coords.Length];
         bool isCoordValid = true;
@@ -125,7 +123,7 @@ public class Block : MonoBehaviour
         // Check each line affected by the block
         // to see if entire line is filled
         // Need to check from top to bottom as shift down from
-        // bottom will affect coord at top
+        // bottom to top will affect coord at top
         for (int i = yCoords.Length - 1; i >= 0; i--)
         {
             if (_board.IsLineFilled(yCoords[i]))
@@ -137,5 +135,6 @@ public class Block : MonoBehaviour
 
         // Event for GameManager for next round
         _nextBlockEvent.Invoke();
+        Destroy(gameObject);
     }
 }

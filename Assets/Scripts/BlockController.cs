@@ -6,12 +6,18 @@ public class BlockController : MonoBehaviour
 {
     private Block _controlledBlock;
     private float _lastMoveTime;
-    private float _speedStep = 0.5f;
+    private float _dropSpeed;
 
     public Block ControlledBlock 
     { 
         get => _controlledBlock; 
         set => _controlledBlock = value; 
+    }
+
+    public float DropSpeed
+    {
+        get => _dropSpeed;
+        set => _dropSpeed = value;
     }
 
     void Start()
@@ -22,9 +28,12 @@ public class BlockController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //if (Time.time - _lastMoveTime >= _speedStep ||
-        //    Input.GetKeyDown(KeyCode.S))
-        if (Input.GetKeyDown(KeyCode.S))
+        if (_controlledBlock == null)
+            return;
+
+        if (Time.time - _lastMoveTime >= _dropSpeed ||
+            Input.GetKeyDown(KeyCode.S))
+        // if (Input.GetKeyDown(KeyCode.S))
         {
             _controlledBlock.Translate(Vector2Int.down);
             _lastMoveTime = Time.time;
@@ -42,7 +51,7 @@ public class BlockController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.W))
         {
-            _controlledBlock.Rotate(90);
+            _controlledBlock.Rotate();
         }
     }
 }

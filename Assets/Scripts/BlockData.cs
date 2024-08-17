@@ -26,7 +26,7 @@ public class BlockData : MonoBehaviour
 
     void Awake()
     {
-        GetAllBlockData("Assets/TxtBlockData/");
+        GetAllBlockData("Assets/Data/TxtBlockData/");
     }
 
     private void GetAllBlockData(string sourceDirectory)

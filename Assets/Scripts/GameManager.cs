@@ -1,17 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Tilemaps;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private GameObject _blockPrefab;
+    [SerializeField] private LevelData[] _levelData;
+    [SerializeField] private UnityEvent _showWinScreenEvent;
+    [SerializeField] private UnityEvent _showLoseScreenEvent;
+
     private BlockController _controller;
     private Dictionary<BlockType, Vector2Int[]> _blockCoordsDict;
     private Board _board;
     private Queue<Block> _blocksQueue = new Queue<Block>();
-    private float score;
-    [SerializeField] private GameObject _blockPrefab;
-    
+    private float _score;
+    private int _currentLevel;
 
     // Start is called before the first frame update
     void Start()
@@ -19,9 +25,25 @@ public class GameManager : MonoBehaviour
         _blockCoordsDict = GetComponent<BlockData>().BlockDataDict;
         _controller = GetComponent<BlockController>();
         _board = FindFirstObjectByType<Board>();
+        _currentLevel = -1;
+        //SpawnBlock();
+        //NextRound();
+    }
+
+    public void RestartFromFirstLevel()
+    {
+        _currentLevel = -1;
+        NextLevel();
+    }
+
+    public void NextLevel()
+    {
+        _score = 0;
+        _currentLevel++;
+        _controller.DropSpeed = _levelData[_currentLevel].SpeedMin;
+        _board.ResetBoard();
         SpawnBlock();
         NextRound();
-        Debug.Log("");
     }
 
     public void NextRound()
@@ -33,6 +55,8 @@ public class GameManager : MonoBehaviour
         // Spawn at top of board
         controlledBlock.SetOffsetToSpawnLocation();
         _controller.ControlledBlock = controlledBlock;
+        if (_controller.DropSpeed > _levelData[_currentLevel].SpeedMax)
+            _controller.DropSpeed -= _levelData[_currentLevel].SpeedStep;
         _board.SetBlockOnTileMap(controlledBlock.GetCoordsAfterOffset());
 
         // Next block
@@ -45,8 +69,8 @@ public class GameManager : MonoBehaviour
         GameObject blockGO = Instantiate(_blockPrefab);
         Block block = blockGO.GetComponent<Block>();
 
-        // Randomly pick which block type and get corresponding coords
-        int blockTypeInd = Random.Range(0, _blockCoordsDict.Count);
+        // Pick block type and get corresponding coords
+        int blockTypeInd = GetNextBlockType();
         Vector2Int[] coords = _blockCoordsDict[(BlockType)blockTypeInd];
 
         // Initialize the coords of block
@@ -58,5 +82,45 @@ public class GameManager : MonoBehaviour
 
         _blocksQueue.Enqueue(block);
         return block;
+    }
+
+    private int GetNextBlockType()
+    {
+        // Let Block A prob = 1, Block B prob = 2, Block C prob = 3
+        // Sum prob = 6
+        // Then pick a random num between 1 to 6 inclusive
+        // Say pick 3.
+        // Then we subtract prob of block A, i.e. 3 - 1 => sum = 2,
+        // Then subtract prob of block B, i.e. 2 - 2 => sum = 0
+        // Therefore pick block B
+
+        int sum = _levelData[_currentLevel].Probabilities.Sum();
+        // Range from 1 to sum inclusive
+        int num = Random.Range(1, sum + 1);
+
+        int selectedBlockType = 0;
+
+        for (int i = 0; i < _levelData[_currentLevel].Probabilities.Length ; i++)
+        {
+            num -= _levelData[_currentLevel].Probabilities[i];
+
+            if (num < 0)
+            {
+                break;
+            }
+            selectedBlockType++;
+        }
+
+        return selectedBlockType;
+    }
+
+    public void IncrementScore()
+    {
+        _score += 1;
+
+        if (_score >= _levelData[_currentLevel].WiningScore)
+        {
+            _showWinScreenEvent.Invoke();
+        }
     }
 }
