@@ -14,6 +14,13 @@ public class Board : MonoBehaviour
 
     private Tilemap _tileMap;
     private int[,] _boardMatrix;
+    private bool _toLose = false;
+
+    public bool ToLose 
+    {
+        get => _toLose; 
+        set => _toLose = value;
+    }
 
     void Awake()
     {
@@ -31,13 +38,12 @@ public class Board : MonoBehaviour
         _tileMap.ClearAllTiles();
 
         BoundsInt boardBound = new BoundsInt(
-            new Vector3Int(0, 0, 0), 
-            new Vector3Int(_width, _height, 0));
+            new Vector3Int(0, 0, -1), 
+            new Vector3Int(_width, _height, -1));
 
         TileBase[] tileArray = new TileBase[
             boardBound.size.x * 
-            boardBound.size.y * 
-            boardBound.size.z];
+            boardBound.size.y];
 
         for (int index = 0; index < tileArray.Length; index++)
         {
@@ -84,11 +90,25 @@ public class Board : MonoBehaviour
         }
     }
 
+    public void ClearNextBlockDisplay(Vector2Int[] coords)
+    {
+        foreach (Vector2Int cellCoord in coords)
+        {
+            _tileMap.SetTile((Vector3Int)cellCoord, null);
+        }
+    }
+
     public void SetBlockOnMatrix(Vector2Int[] coords)
     {
         foreach (Vector2Int cellCoord in coords)
         {
             _boardMatrix[cellCoord.x, cellCoord.y] = 1;
+
+            if (cellCoord.y > 17)
+            {
+                _toLose = true;
+                break;
+            }
         }
     }
 

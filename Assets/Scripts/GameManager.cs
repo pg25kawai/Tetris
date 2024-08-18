@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Tilemaps;
 
 public class GameManager : MonoBehaviour
 {
@@ -11,13 +10,20 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LevelData[] _levelData;
     [SerializeField] private UnityEvent _showWinScreenEvent;
     [SerializeField] private UnityEvent _showLoseScreenEvent;
+    [SerializeField] private UnityEvent _hideNextLevelButtonEvent;
 
+    private StatsUI _statsUI;
     private BlockController _controller;
     private Dictionary<BlockType, Vector2Int[]> _blockCoordsDict;
     private Board _board;
     private Queue<Block> _blocksQueue = new Queue<Block>();
     private float _score;
     private int _currentLevel;
+    private bool _stopSpawning = false;
+
+    public float Score => _score;
+    public int CurrentLevel => _currentLevel;
+
 
     // Start is called before the first frame update
     void Start()
@@ -25,14 +31,21 @@ public class GameManager : MonoBehaviour
         _blockCoordsDict = GetComponent<BlockData>().BlockDataDict;
         _controller = GetComponent<BlockController>();
         _board = FindFirstObjectByType<Board>();
+        _statsUI = FindFirstObjectByType<StatsUI>();
         _currentLevel = -1;
-        //SpawnBlock();
-        //NextRound();
+    }
+
+    private void ResetParams()
+    {
+        _stopSpawning = false;
+        _board.ToLose = false;
+        _blocksQueue = new Queue<Block>();
     }
 
     public void RestartFromFirstLevel()
     {
         _currentLevel = -1;
+        ResetParams();
         NextLevel();
     }
 
@@ -40,7 +53,11 @@ public class GameManager : MonoBehaviour
     {
         _score = 0;
         _currentLevel++;
-        _controller.DropSpeed = _levelData[_currentLevel].SpeedMin;
+        _statsUI.ChangeScoreDisplay(_score.ToString());
+        _statsUI.ChangeLevelDisplay((_currentLevel + 1).ToString());
+
+        ResetParams();
+        _controller.DropCooldown = _levelData[_currentLevel].SpeedMin;
         _board.ResetBoard();
         SpawnBlock();
         NextRound();
@@ -48,22 +65,30 @@ public class GameManager : MonoBehaviour
 
     public void NextRound()
     {
+        if (_stopSpawning) return;
+
+        if (_board.ToLose)
+        {
+            _showLoseScreenEvent.Invoke();
+            _stopSpawning = true;
+        }
+
         // Get next block and clear block from next block area
         Block controlledBlock = _blocksQueue.Dequeue();
-        _board.SetBlockOnTileMap(controlledBlock.GetCoordsAfterOffset(), toClear: true);
+        _board.ClearNextBlockDisplay(controlledBlock.GetCoordsAfterOffset());
 
         // Spawn at top of board
         controlledBlock.SetOffsetToSpawnLocation();
         _controller.ControlledBlock = controlledBlock;
-        if (_controller.DropSpeed > _levelData[_currentLevel].SpeedMax)
-            _controller.DropSpeed -= _levelData[_currentLevel].SpeedStep;
+        if (_controller.DropCooldown > _levelData[_currentLevel].SpeedMax)
+            _controller.DropCooldown -= _levelData[_currentLevel].SpeedStep;
         _board.SetBlockOnTileMap(controlledBlock.GetCoordsAfterOffset());
 
         // Next block
         SpawnBlock();
     }
 
-    private Block SpawnBlock()
+    private void SpawnBlock()
     {
         // Instantiate the prefab and get the Block script
         GameObject blockGO = Instantiate(_blockPrefab);
@@ -81,7 +106,6 @@ public class GameManager : MonoBehaviour
         _board.SetBlockOnTileMap(block.GetCoordsAfterOffset());
 
         _blocksQueue.Enqueue(block);
-        return block;
     }
 
     private int GetNextBlockType()
@@ -98,7 +122,7 @@ public class GameManager : MonoBehaviour
         // Range from 1 to sum inclusive
         int num = Random.Range(1, sum + 1);
 
-        int selectedBlockType = 0;
+        int selectedBlockType = -1;
 
         for (int i = 0; i < _levelData[_currentLevel].Probabilities.Length ; i++)
         {
@@ -117,10 +141,15 @@ public class GameManager : MonoBehaviour
     public void IncrementScore()
     {
         _score += 1;
+        _statsUI.ChangeScoreDisplay(_score.ToString());
 
         if (_score >= _levelData[_currentLevel].WiningScore)
         {
             _showWinScreenEvent.Invoke();
+            _stopSpawning = true;
+
+            if (_currentLevel == 2)
+                _hideNextLevelButtonEvent.Invoke();
         }
     }
 }
