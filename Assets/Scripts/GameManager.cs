@@ -24,8 +24,6 @@ public class GameManager : MonoBehaviour
     public float Score => _score;
     public int CurrentLevel => _currentLevel;
 
-
-    // Start is called before the first frame update
     void Start()
     {
         _blockCoordsDict = GetComponent<BlockData>().BlockDataDict;
@@ -126,13 +124,11 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < _levelData[_currentLevel].Probabilities.Length ; i++)
         {
+            selectedBlockType++;
             num -= _levelData[_currentLevel].Probabilities[i];
 
-            if (num < 0)
-            {
+            if (num <= 0)
                 break;
-            }
-            selectedBlockType++;
         }
 
         return selectedBlockType;

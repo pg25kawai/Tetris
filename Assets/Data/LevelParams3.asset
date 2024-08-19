@@ -16,5 +16,5 @@ MonoBehaviour:
   Probabilities: 01000000020000000200000002000000020000000200000002000000
   WiningScore: 20
   SpeedMin: 0.7
-  SpeedMax: 0.4
+  SpeedMax: 0.3
   SpeedStep: 0.05

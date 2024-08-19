@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IncludedShapes: 00000000010000000200000003000000040000000500000006000000
   Probabilities: 01000000020000000200000002000000020000000200000002000000
-  WiningScore: 20
+  WiningScore: 10
   SpeedMin: 0.7
-  SpeedMax: 0.4
+  SpeedMax: 0.5
   SpeedStep: 0.05
