@@ -7,14 +7,14 @@ using UnityEngine.Events;
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private GameObject _blockPrefab;
-    [SerializeField] private LevelData[] _levelData;
+    [SerializeField] private LevelDataSO[] _levelData;
     [SerializeField] private UnityEvent _showWinScreenEvent;
     [SerializeField] private UnityEvent _showLoseScreenEvent;
     [SerializeField] private UnityEvent _hideNextLevelButtonEvent;
 
     private StatsUI _statsUI;
     private BlockController _controller;
-    private Dictionary<BlockType, Vector2Int[]> _blockCoordsDict;
+    private BlockType[] _blockTypes;
     private Board _board;
     private Queue<Block> _blocksQueue = new Queue<Block>();
     private float _score;
@@ -26,11 +26,15 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        _blockCoordsDict = GetComponent<BlockData>().BlockDataDict;
         _controller = GetComponent<BlockController>();
         _board = FindFirstObjectByType<Board>();
         _statsUI = FindFirstObjectByType<StatsUI>();
         _currentLevel = -1;
+    }
+
+    private BlockType[] ReadBlockTypeSO()
+    {
+        return _levelData[_currentLevel].IncludedShapes;
     }
 
     private void ResetParams()
@@ -51,6 +55,7 @@ public class GameManager : MonoBehaviour
     {
         _score = 0;
         _currentLevel++;
+        _blockTypes = ReadBlockTypeSO();
         _statsUI.ChangeScoreDisplay(_score.ToString());
         _statsUI.ChangeLevelDisplay((_currentLevel + 1).ToString());
 
@@ -94,7 +99,8 @@ public class GameManager : MonoBehaviour
 
         // Pick block type and get corresponding coords
         int blockTypeInd = GetNextBlockType();
-        Vector2Int[] coords = _blockCoordsDict[(BlockType)blockTypeInd];
+        Vector2Int[] coords = _blockTypes[blockTypeInd].Coords;
+        //Vector2Int[] coords = _blockCoordsDict[(BlockType)blockTypeInd];
 
         // Initialize the coords of block
         // the initial offset is at the next block display area

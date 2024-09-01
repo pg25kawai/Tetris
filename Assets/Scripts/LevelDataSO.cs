@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "LevelParams", menuName = "Level/New Level Parameters")]
-public class LevelData : ScriptableObject
+public class LevelDataSO : ScriptableObject
 {
     public BlockType[] IncludedShapes;
     public int[] Probabilities;

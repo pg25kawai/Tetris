@@ -2,34 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
 using UnityEngine;
 
 
-public enum BlockType
+public class BlockDataReader : MonoBehaviour
 {
-    I,
-    J,
-    L,
-    O,
-    S,
-    T,
-    Z
-}
-
-public class BlockData : MonoBehaviour
-{
-    // Dictionary to store all block data, read from txt files
-    private Dictionary<BlockType, Vector2Int[]> _blockDataDict = 
-        new Dictionary<BlockType, Vector2Int[]>();
-
-    public Dictionary<BlockType, Vector2Int[]> BlockDataDict => _blockDataDict;
-
-    void Awake()
-    {
-        GetAllBlockData("Assets/Data/TxtBlockData/");
-    }
-
-    private void GetAllBlockData(string sourceDirectory)
+    public void GetAllBlockData(string sourceDirectory)
     {
         // Read all text files block data from sourceDirectory
         var txtFiles = Directory.EnumerateFiles(sourceDirectory, "*.txt");
@@ -86,7 +65,7 @@ public class BlockData : MonoBehaviour
         sr.Close();
 
         SetPivotToOrigin(pivotXIdx, pivotYIdx, coords);
-        AddBlockToData(UID.ToString(), coords);
+        AddBlockToData(UID, coords);
     }
 
     private void SetPivotToOrigin(int pivotXCoord, int pivotYCoord, Vector2Int[] allCoords)
@@ -99,10 +78,33 @@ public class BlockData : MonoBehaviour
         }
     }
 
-    private void AddBlockToData(string UID, Vector2Int[] allCoords)
+    private void AddBlockToData(char UID, Vector2Int[] allCoords)
     {
-        // Get Enum type by UID string
-        BlockType blockType = (BlockType) Enum.Parse(typeof(BlockType), UID);
-        _blockDataDict.Add(blockType, allCoords);
+        // Create scriptable object of blocks
+        BlockType newBlock = ScriptableObject.CreateInstance<BlockType>();
+        newBlock.UID = UID;
+        newBlock.Coords = allCoords;
+
+        string blockName = "Block" + UID + ".asset";
+
+        AssetDatabase.CreateAsset(newBlock, "Assets/Data/SOBlockData/" + blockName);
+        AssetDatabase.SaveAssets();
+
+        EditorUtility.FocusProjectWindow();
+
+        Selection.activeObject = newBlock;
+    }
+}
+
+// Click button in inspector to read all block from txt data
+[CustomEditor(typeof(BlockDataReader))]
+class BlockDataReaderHelperEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        BlockDataReader script = (BlockDataReader)target;
+
+        if (GUILayout.Button("Read Blocks"))
+            script.GetAllBlockData("Assets/Data/TxtBlockData/");
     }
 }

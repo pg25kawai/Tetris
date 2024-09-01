@@ -12,7 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1560e4c76447f364693ba03e6ce629f9, type: 3}
   m_Name: LevelParams1
   m_EditorClassIdentifier: 
-  IncludedShapes: 00000000010000000200000003000000040000000500000006000000
+  IncludedShapes:
+  - {fileID: 11400000, guid: 56ed3d87f1f86ba4c8bccd4657810f57, type: 2}
+  - {fileID: 11400000, guid: b490ef5c854287647b2597783d1a3175, type: 2}
+  - {fileID: 11400000, guid: 6da1bad30d5705043a10eb5e92e54e86, type: 2}
+  - {fileID: 11400000, guid: 7fa40bd4887745f4eae822cf945cd2cc, type: 2}
+  - {fileID: 11400000, guid: 4d9641049cc1c5746aa51890a236912b, type: 2}
+  - {fileID: 11400000, guid: a4a8151b73d205b49937f2c784d1e759, type: 2}
+  - {fileID: 11400000, guid: db15b0256e8f1854aa1949359fa40e8c, type: 2}
   Probabilities: 01000000020000000200000002000000020000000200000002000000
   WiningScore: 10
   SpeedMin: 0.7
